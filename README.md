@@ -38,4 +38,31 @@ dependencies installation
 python -m pip install -r client/requirements.txt
 ```
 
+2. <p>Change server path in ` /client/main.py ` </p>
+
+default from docker compose is `http://127.0.0.1:8666`
+
+example 
+```python
+import requests
+
+import io
+import cv2 
+import sys 
+import time 
+import numpy as np
+from PIL import ImageGrab
+
+
+# server url
+SERVER_URL = 'http://127.0.0.1:8666'
+
+```
+
+3. Now go to the `/client` folder and run main.py script
+
+```bash
+python main.py
+```
+
 
