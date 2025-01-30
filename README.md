@@ -11,3 +11,31 @@ To start server you just need to run a compose file
 ```bash
 sudo docker-compose -f dev-docker-compose.yaml up
 ```
+
+## CLIENT 
+
+1. <p>Create virtual environment and install all dependencies in `/client` folder</p>
+venv creation
+
+```bash
+python -m venv venv
+```
+
+windows env activation
+
+```bash
+venv\Scripts\activate
+```
+
+linux env activation
+```bash
+source venv/bin/activate
+```
+
+dependencies installation
+
+```bash
+python -m pip install -r client/requirements.txt
+```
+
+
