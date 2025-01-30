@@ -12,10 +12,20 @@ import cv2
 import sys
 import asyncio
 import io
+import time  
+
+
+# for video route
+CHUNK_SIZE = 48*48
+video_path = Path("rickroll.mp4")
+
+# server url
+# must be used in http render.. buuuuut later
+SERVER_URL = '127.0.0.1:8666'
+
 
 app = FastAPI(
-    title="Streamer",
-    version="0.00000.1blya" 
+    title="Streamer", 
 )
 
 origins = [
@@ -36,17 +46,8 @@ app.add_middleware(
 templates = Jinja2Templates(directory="templates")
 
 
-# for video route
-CHUNK_SIZE = 48*48
-video_path = Path("rickroll.mp4")
-
-
-class BinaryCacher(BaseModel):
-    body:str
-
-
 def yeld_rickroll_frame():
-    rickroll = 'rickroll.mp4'
+    rickroll = video_path
     video = cv2.VideoCapture(rickroll)
 
     while True:
@@ -65,14 +66,34 @@ def numpy_im_to_byte_frame(frame):
     stringData_mask=imgencode_Mask.tostring()
     return  io.BytesIO(stringData_mask).getvalue()
 
+
+
 g = yeld_rickroll_frame()
 
-
 def get_frame():
+    """ITS A RICKROLL FRAME"""
     frame = next(g)
     return numpy_im_to_byte_frame(frame)
 
 
+class ImageFrame():
+    data = b""
+    LIFE_TIME = time.time()
+    MAX_LIFE_TIME = 5 #sec
+
+    def is_expired(self):
+
+        return time.time() - self.LIFE_TIME   > self.MAX_LIFE_TIME
+
+    def write(self, data):
+        self.data = data
+        self.new_breath()
+
+    def new_breath(self):
+        """extends life time"""
+        self.LIFE_TIME = time.time()
+
+IMAGE_FRAME = ImageFrame()
 
 
 @app.get('/ping')
@@ -80,45 +101,45 @@ def ping():
     response = 'pong'
     return {"response": response, "code": 200}
 
-""" @app.get('/',  response_class=RedirectResponse)
-def start_page(reqest:Request):
-    url = '/docs'
-    return url """
-
-class ImageFrame():
-    data = b""
-IMAGE_FRAME =  ImageFrame()
-
 
 @app.post("/cach-image")
 def byle_lmage_loader(body:Any = Body(None)):
-    IMAGE_FRAME.data = body 
+    """client sends his image here"""
+    IMAGE_FRAME.write(body)  
     return {"result": "Ok"}
 
 
-""" @app.get("/")
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", context={"request": request})
- """
-
 @app.get("/")
 async def read_img(request: Request):
-    return templates.TemplateResponse("im-index.html", context={"request": request})
-
+    """main page"""
+    return templates.TemplateResponse("index.html", 
+                                      context={"request": request, "SERVER":SERVER_URL})
 
 
 @app.get("/stream")
 async def get_image():
-    return Response(content=IMAGE_FRAME.data,media_type="text/plain")
+    """striaming func"""
+    if IMAGE_FRAME.is_expired():
+        # rickroll if nothing to show 
+        return Response(content=get_frame(),media_type="text/plain")
+    else:
+        return Response(content=IMAGE_FRAME.data,media_type="text/plain")
 
 
 @app.get("/image")
 async def get_image():
+    """
+    just rickroll content
+    THIS IS NOT A PAGE
+    """
     return Response(content=get_frame(),media_type="text/plain") # media_type='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.get("/video")
 async def video_endpoint(range: str = Header(None)):
+    """
+    full rickroll video
+    """
     start, end = range.replace("bytes=", "").split("-")
     start = int(start)
     end = int(end) if end else start + CHUNK_SIZE
