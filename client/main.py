@@ -8,6 +8,11 @@ import numpy as np
 from PIL import ImageGrab
 
 
+# server url
+# must be used in http render.. buuuuut
+SERVER_URL = 'http://127.0.0.1:8666'
+
+
 def yield_a_screenshot():
     while True:
         img = ImageGrab.grab()
@@ -35,6 +40,7 @@ def numpy_im_to_byte_frame(frame):
     stringData_mask=imgencode_Mask.tostring()
     return  io.BytesIO(stringData_mask).getvalue()
 
+
 g = yeld_rickroll_frame()
 screen = yield_a_screenshot()
 
@@ -44,11 +50,9 @@ def get_frame():
 
 
 
-string = "Привет мир!".encode("utf-8")
-print (string)
 
 while True:
-    requests.post(url="http://127.0.0.1:8666/cach-image", 
+    requests.post(url=f"{SERVER_URL}/cach-image", 
               data=get_frame(),
               headers={'Content-Type': 'text/plain'})
     time.sleep(0.1)

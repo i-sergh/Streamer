@@ -1,0 +1,9 @@
+wheel
+
+requests
+
+numpy
+
+pillow
+
+opencv-python
