@@ -9,7 +9,6 @@ from PIL import ImageGrab
 
 
 # server url
-# must be used in http render.. buuuuut
 SERVER_URL = 'http://127.0.0.1:8666'
 
 
